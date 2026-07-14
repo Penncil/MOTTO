@@ -418,11 +418,6 @@ class SiteTensorTrainAnalysis:
     def _compute_last_record_date(self, df):
         """
         Process last_record with correct handling of missing, negative, and administrative censoring
-        
-        This implements the THREE-STEP approach:
-        1. Missing last_record (no observed follow-up) → entry_date + 0.5 days
-        2. Negative follow-up (data quality issue) → entry_date + 0.5 days  
-        3. Administrative censoring (observed follow-up) → cap at study_end_date
         """
         print("  Processing last_record_date from FIXED cohort file...")
         
@@ -574,7 +569,6 @@ class SiteTensorTrainAnalysis:
                               f"have outcome_date > last_record_date (setting event to 0)")
                         event_indicator[outcome_after_last] = 0
                 
-                # CORRECT: Individual censoring times
                 time_to_event = np.where(
                     event_indicator == 1,
                     (outcome_dates - entry_dates).dt.days,
@@ -1025,11 +1019,6 @@ class SiteTensorTrainAnalysis:
                                       washout_condition=None, ps_calculated=False):
         """
         Run a single TT analysis and return aggregated summary
-        
-        *** REVISION: NO LONGER PERFORMS AUTOMATIC WASHOUT ***
-        - washout_condition parameter kept for backward compatibility but not used
-        - All washout should be performed externally before calling this method
-        - This method now only performs the tensor train analysis on the provided df
         """
         analysis_start_time = time.time()
 
