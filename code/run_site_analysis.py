@@ -1,18 +1,10 @@
 """
-Step 2 of the MOTTO demo: run the site-level analysis.
-
-Runs ONE site (or all sites) for a single primary outcome and a single effect
-modifier. The scope is set by configuring each analyzer instance, so the
-analysis code (federated_analysis.py) stays untouched.
+Run the site-level analysis.
 
 Usage:
     python run_site_analysis.py            # run every site in SITES
     python run_site_analysis.py Yale       # run just one site
-Or use the per-site wrappers, e.g.:
-    python run_site_analysis_yale.py
 
-Each site writes one .pkl per analysed outcome into RESULTS_DIR. No
-patient-level data leaves the site step.
 """
 import os
 import sys
