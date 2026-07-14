@@ -5,7 +5,7 @@
 ![Python](https://img.shields.io/badge/python-3.9%2B-blue)
 ![Status](https://img.shields.io/badge/paper-under%20review-orange)
 
-MOTTO is a pframework for estimating **heterogeneous treatment effects on time-to-event outcomes across multiple health systems**, without pooling patient-level data. Each site fits overlap-weighted Cox models locally and shares only a compressed **tensor-train (TT)** representation of its likelihood surface; the coordinating center reconstructs the multi-site estimates from these compressed cores. The reconstruction is **lossless** — it reproduces the estimates that would have been obtained from a pooled analysis — while only low-dimensional summaries ever leave each site.
+MOTTO is a framework for estimating **heterogeneous treatment effects on time-to-event outcomes across multiple health systems**, without pooling patient-level data. Each site fits overlap-weighted Cox models locally and shares only a compressed **tensor-train (TT)** representation of its likelihood surface; the coordinating center reconstructs the multi-site estimates from these compressed cores. The reconstruction is **lossless** — it reproduces the estimates that would have been obtained from a pooled analysis — while only low-dimensional summaries ever leave each site.
 
 This repository provides the analysis code, a fully reproducible **synthetic** demonstration, and the condition code definitions used in the study.
 
