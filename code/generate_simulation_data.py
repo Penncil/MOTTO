@@ -1,17 +1,5 @@
 """
-Synthetic data generator for the MOTTO study (GLP-1RAs and psychiatric outcomes).
-
-Produces one CSV per health system, formatted to run through the MOTTO
-site-level pipeline (federated_site_analysis_matching_YW.py), which fits
-overlap-weighted Cox models on TIME-TO-EVENT outcomes.
-
-This is synthetic data for a runnable demonstration only. Covariate
-distributions are loosely based on the manuscript; treatment effects are not
-tuned to reproduce the reported hazard ratios (the pipeline is validated on
-real data, not on these numbers).
-
-Design principles: single file, numpy/pandas only, config-driven, one
-responsibility per function (YAGNI / KISS / SOLID).
+Synthetic data generator for the MOTTO study
 """
 import numpy as np
 import pandas as pd
@@ -40,9 +28,6 @@ PSYCH_OUTCOMES = [
 ]
 
 # Negative control outcomes. The main text references Supplementary Table S4
-# for the full list; here we emit N_NCO generic controls (nco_1 ... nco_N).
-# NOTE: runtime scales with N_NCO (each NCO is analysed per outcome x modifier),
-# so lower this for a quick smoke test.
 N_NCO = 6
 
 # Per-outcome baseline daily hazard (chosen only to yield sensible event
