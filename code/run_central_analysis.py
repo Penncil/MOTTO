@@ -1,18 +1,5 @@
 """
-Step 3 of the MOTTO demo: aggregate the site results at the coordinating center.
-
-Reads the per-site tensor-train cores written by run_site_analysis.py, combines
-them into pooled-equivalent estimates, and writes a results CSV.
-
-Note on file discovery: the central script's automatic directory search expects
-filenames like "*_modifier*_results_*.pkl", but the site step writes
-"*_OOI*_results_*.pkl". The aggregation itself buckets results by
-(outcome, modifier) read from the pickle CONTENTS, not the filename, so we simply
-collect the site files ourselves and pass them via pkl_file_paths.
-
-Run AFTER run_site_analysis.py:
-
-    python run_central_analysis.py
+Aggregate the site results at the coordinating center.
 """
 import os
 import glob
