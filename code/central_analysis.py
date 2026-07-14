@@ -24,7 +24,6 @@ warnings.filterwarnings('ignore')
 class NumpyUnpickler(pickle.Unpickler):
     """
     Custom unpickler to handle numpy module changes between versions.
-    Fixes: 'No module named numpy._core' error
     """
     def find_class(self, module, name):
         # Handle numpy._core to numpy.core compatibility
