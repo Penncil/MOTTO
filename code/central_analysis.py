@@ -1,29 +1,4 @@
 #!/usr/bin/env python3
-"""
-FEDERATED TENSOR TRAIN ANALYSIS - CENTRAL COORDINATION (FIXED VERSION)
-======================================================================
-
-CRITICAL FIXES IN THIS VERSION:
-1. ✅ FIXED: Different tensor train ranks across sites (adaptive rank handling with zero-padding)
-2. ✅ FIXED: numpy._core compatibility (backward compatible pickle loading)
-3. ✅ VERIFIED: SE scaling is correct (only scaled once by total_patients, matching simulation)
-
-KEY IMPROVEMENTS:
-- Adaptive rank aggregation: Handles different TT ranks across sites
-- Zero-padding strategy: Pads smaller rank cores to match maximum rank
-- Numpy compatibility: Handles both old (numpy.core) and new (numpy._core) versions
-- SE scaling verification: Confirmed single scaling by total_patients (line 696)
-
-MATHEMATICAL VALIDATION:
-The SE calculation matches the simulation code (run_strat_tt_simulations_YW_June4.py):
-- Simulation line 365-370: var_TT = diag_elements / pre_n (single division by sample size)
-- This code line 696: var_cov_matrix = hessian_inv / total_patients (single division)
-- ✅ CORRECT: SE is scaled only ONCE by dividing variance by total sample size
-
-VERSION: 7.0 - RANK HANDLING FIX + NUMPY COMPATIBILITY
-DATE: November 18, 2025
-AUTHOR: Emma (with expert tensor train validation)
-"""
 
 import numpy as np
 import pandas as pd
@@ -50,9 +25,6 @@ class NumpyUnpickler(pickle.Unpickler):
     """
     Custom unpickler to handle numpy module changes between versions.
     Fixes: 'No module named numpy._core' error
-    
-    Background: In numpy 2.0+, numpy.core was renamed to numpy._core
-    This unpickler redirects the old module name to work with both versions.
     """
     def find_class(self, module, name):
         # Handle numpy._core to numpy.core compatibility
@@ -300,8 +272,6 @@ class CheckpointCentralTensorTrainAnalysis:
         """
         Read all pickle objects from an append-style pickle file with numpy compatibility
         
-        FIXED: Now handles numpy._core compatibility issues and append-style format
-        
         Parameters:
         -----------
         file_path : str
@@ -372,14 +342,6 @@ class CheckpointCentralTensorTrainAnalysis:
                                checkpoint_mode=True):
         """
         Load checkpoint/interim results from participating sites (MODIFIER-PARALLEL VERSION)
-        
-        FIXED: Now uses safe_pickle_load to handle numpy compatibility
-        
-        NEW IN THIS VERSION:
-        - Expects files organized by MODIFIER, not by OOI
-        - Filename pattern: {SITE}_{COMPARISON}_modifier{IDX:02d}_{MODIFIER}_results_{TIMESTAMP}.pkl
-        - Each file contains ALL outcomes for ONE modifier
-        - Reconstructs (outcome, modifier) combinations from individual site_results
         
         Parameters:
         -----------
@@ -637,12 +599,6 @@ class CheckpointCentralTensorTrainAnalysis:
         """
         Aggregate tensor train cores from multiple sites using direct TorchTT addition
 
-        MODIFIED: Uses TorchTT's built-in addition operator instead of zero-padding
-
-        When sites have different tensor train ranks due to adaptive rank selection,
-        TorchTT addition automatically handles this via rank expansion. This preserves
-        the mathematical structure better than manual zero-padding.
-
         Parameters:
         -----------
         site_results_for_combination : list of dict
@@ -777,13 +733,6 @@ class CheckpointCentralTensorTrainAnalysis:
     def compute_final_estimates_with_covariance(self, aggregated_tt_cores, total_patients):
         """
         Compute final coefficient estimates and variance-covariance matrix
-
-        VERIFIED: SE scaling matches simulation (single division by total_patients)
-
-        This implementation exactly matches the simulation code in run_strat_tt_simulations_YW_June4.py:
-        - Simulation lines 365-370: var_TT = diag_elements / pre_n
-        - This code line 696: var_cov_matrix = hessian_inv / total_patients
-        - ✅ CORRECT: SE is scaled only ONCE by dividing variance by total sample size
 
         Parameters:
         -----------
@@ -1173,13 +1122,8 @@ class CheckpointCentralTensorTrainAnalysis:
 
 if __name__ == "__main__":
     print("""
-    FEDERATED TENSOR TRAIN ANALYSIS - CENTRAL COORDINATION (FIXED VERSION)
+    FEDERATED TENSOR TRAIN ANALYSIS - CENTRAL COORDINATION
     =====================================================================
-    
-    CRITICAL FIXES:
-    1. ✅ Handles different tensor train ranks across sites (zero-padding)
-    2. ✅ Fixes numpy._core compatibility error
-    3. ✅ Verified correct SE scaling (matches simulation)
     
     Example usage:
     
@@ -1224,11 +1168,11 @@ if __name__ == "__main__":
     
     # Run analysis - Combine files from the specified directory
     results = central.run_checkpoint_analysis(
-        results_directory="/Users/siqichen/Desktop/LATTE/0212/results",
+        results_directory="/path/to/results",
         comparison_type="glp1_vs_dpp4",
         min_sites_required=2,
         analyze_all=True,
-        output_file="/Users/siqichen/Desktop/LATTE/0212/Penn_combined_dpp4_results1119.csv"
+        output_file=" UPDATE THE FILE NAME "
     )
 
     
