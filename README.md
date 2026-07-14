@@ -5,34 +5,40 @@
 ![Python](https://img.shields.io/badge/python-3.9%2B-blue)
 ![Status](https://img.shields.io/badge/paper-under%20review-orange)
 
-MOTTO is a framework for estimating **heterogeneous treatment effects on time-to-event outcomes across multiple health systems**, without pooling patient-level data. Each site fits overlap-weighted Cox models locally and shares only a compressed **tensor-train (TT)** representation of its likelihood surface; the coordinating center reconstructs the multi-site estimates from these compressed cores. The reconstruction is **lossless** — it reproduces the estimates that would have been obtained from a pooled analysis — while only low-dimensional summaries ever leave each site.
+MOTTO is a pframework for estimating **heterogeneous treatment effects on time-to-event outcomes across multiple health systems**, without pooling patient-level data. Each site fits overlap-weighted Cox models locally and shares only a compressed **tensor-train (TT)** representation of its likelihood surface; the coordinating center reconstructs the multi-site estimates from these compressed cores. The reconstruction is **lossless** — it reproduces the estimates that would have been obtained from a pooled analysis — while only low-dimensional summaries ever leave each site.
 
 This repository provides the analysis code, a fully reproducible **synthetic** demonstration, and the condition code definitions used in the study.
 
 ---
 
-## Repository contents
+## Repository structure
 
 ```
 MOTTO/
 ├── README.md
-├── generate_simulation_data.py     # Synthetic multi-site data generator
-├── federated_analysis.py           # Site-level analysis (local Cox + TT compression)
-├── central_analysis.py             # Central aggregation (lossless TT reconstruction)
-├── run_site_analysis.py            # Driver: run one site (or all sites)
-├── run_central_analysis.py         # Driver: aggregate site results
-├── medical_condition.csv           # Medical condition → ICD code crosswalk
-├── site_Penn_data.csv              # Synthetic site cohorts (Penn, Yale,
-├── site_Yale_data.csv              #   Mayo, UTSW, OneFlorida+)
-├── site_Mayo_data.csv
-├── site_UTSW_data.csv
-├── site_UF_data.csv
-├── motto_federated_results.csv     # Final aggregated estimates
+├── requirements.txt
+├── code/
+│   ├── generate_simulation_data.py   # Synthetic multi-site data generator
+│   ├── federated_analysis.py         # Site-level analysis (local Cox + TT compression)
+│   ├── central_analysis.py           # Central aggregation (lossless TT reconstruction)
+│   ├── run_site_analysis.py          # Driver: run one site (or all sites)
+│   └── run_central_analysis.py       # Driver: aggregate site results
+├── codelists/
+│   └── medical_condition.csv         # Medical condition → ICD code crosswalk
+├── data/
+│   ├── site_Penn_data.csv            # Synthetic site cohorts
+│   ├── site_Yale_data.csv            #   (Penn, Yale, Mayo, UTSW, OneFlorida+)
+│   ├── site_Mayo_data.csv
+│   ├── site_UTSW_data.csv
+│   └── site_UF_data.csv
 └── results/
-    └── <Site>_glp1_vs_sglt2_OOI1_results_<timestamp>.pkl   # Per-site TT cores
+    ├── <Site>_glp1_vs_sglt2_OOI1_results_<timestamp>.pkl   # Per-site TT cores
+    └── motto_federated_results.csv                          # Final aggregated estimates
 ```
 
-> **Note on the data.** The `site_*.csv` files are **synthetic**. They are simulated to match the covariate structure and time-to-event format of the study cohorts, but contain no real patient records. Treatment effects in the simulation are illustrative and are **not** tuned to reproduce the hazard ratios reported in the paper. They exist so the full pipeline can be run end-to-end and inspected. `medical_condition.csv` maps clinical conditions (comorbidities, outcomes, and negative controls) to their defining ICD-9/ICD-10 codes.
+All scripts resolve paths relative to their own location, so the commands below can be run from the repository root without editing any paths.
+
+> **Note on the data.** The files in `data/` are **synthetic**. They are simulated to match the covariate structure and time-to-event format of the study cohorts, but contain no real patient records. Treatment effects in the simulation are illustrative and are **not** tuned to reproduce the hazard ratios reported in the paper. They exist so the full pipeline can be run end-to-end and inspected. `codelists/medical_condition.csv` maps clinical conditions (comorbidities, outcomes, and negative controls) to their defining ICD-9/ICD-10 codes.
 
 ---
 
@@ -56,7 +62,7 @@ The comparison implemented here is **GLP-1 receptor agonists vs. SGLT-2 inhibito
 Requires Python ≥ 3.9.
 
 ```bash
-pip install numpy pandas scipy scikit-learn tqdm torch torchtt numdifftools
+pip install -r requirements.txt
 ```
 
 `torch` and `torchtt` provide the tensor-train cross-approximation and reconstruction; the remaining packages handle data preparation, propensity-score estimation, and standard-error computation.
@@ -65,32 +71,32 @@ pip install numpy pandas scipy scikit-learn tqdm torch torchtt numdifftools
 
 ## Quick start
 
-The pipeline runs in three steps. The site step is designed to be run **independently per site**, mirroring the federated setting.
+The pipeline runs in three steps. The site step is designed to be run **independently per site**, mirroring the federated setting. All commands are run from the repository root.
 
 **1. Generate the synthetic site cohorts**
 
 ```bash
-python generate_simulation_data.py
+python code/generate_simulation_data.py
 ```
 
-Writes `site_<Site>_data.csv` for each of the five sites.
+Writes `data/site_<Site>_data.csv` for each of the five sites.
 
 **2. Run the site-level analysis**
 
 Run one site at a time (the site name is passed as an argument):
 
 ```bash
-python run_site_analysis.py Penn
-python run_site_analysis.py Yale
-python run_site_analysis.py Mayo
-python run_site_analysis.py UTSW
-python run_site_analysis.py UF
+python code/run_site_analysis.py Penn
+python code/run_site_analysis.py Yale
+python code/run_site_analysis.py Mayo
+python code/run_site_analysis.py UTSW
+python code/run_site_analysis.py UF
 ```
 
 Or run every site in one call:
 
 ```bash
-python run_site_analysis.py
+python code/run_site_analysis.py
 ```
 
 Each site writes its compressed TT cores to `results/` as a `.pkl` file. No patient-level data is written.
@@ -98,20 +104,20 @@ Each site writes its compressed TT cores to `results/` as a `.pkl` file. No pati
 **3. Aggregate at the coordinating center**
 
 ```bash
-python run_central_analysis.py
+python code/run_central_analysis.py
 ```
 
-Collects the per-site `.pkl` files in `results/`, reconstructs the multi-site estimates, and writes `motto_federated_results.csv`.
+Collects the per-site `.pkl` files in `results/`, reconstructs the multi-site estimates, and writes `results/motto_federated_results.csv`.
 
 ### Demonstration scope
 
-Out of the box, the drivers analyze a single outcome (`visits_depression`) and a single effect modifier (`age_binary`), plus the negative control outcomes. This keeps the demo fast. To analyze a different outcome or modifier, edit the `OUTCOME` and `MODIFIER` constants at the top of `run_site_analysis.py`. The full study spans six psychiatric outcomes and a broader set of effect modifiers; these are configured the same way.
+Out of the box, the drivers analyze a single outcome (`visits_depression`) and a single effect modifier (`age_binary`), plus the negative control outcomes. This keeps the demo fast. To analyze a different outcome or modifier, edit the `OUTCOME` and `MODIFIER` constants at the top of `code/run_site_analysis.py`. The full study spans six psychiatric outcomes and a broader set of effect modifiers; these are configured the same way.
 
 ---
 
 ## Output
 
-`motto_federated_results.csv` contains one row per analyzed (outcome, modifier) combination:
+`results/motto_federated_results.csv` contains one row per analyzed (outcome, modifier) combination:
 
 | Column | Description |
 | --- | --- |
@@ -134,7 +140,6 @@ Exponentiating the β columns yields hazard ratios. Because the negative control
 ## Privacy
 
 Only compressed tensor-train cores and aggregate summary statistics are shared between sites and the center. Individual-level records never leave a site. In the demonstration this is emulated by writing per-site `.pkl` files that the central step reads; in deployment, these cores are the only artifacts transmitted.
-
 
 ---
 
