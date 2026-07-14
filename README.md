@@ -135,26 +135,6 @@ Exponentiating the β columns yields hazard ratios. Because the negative control
 
 Only compressed tensor-train cores and aggregate summary statistics are shared between sites and the center. Individual-level records never leave a site. In the demonstration this is emulated by writing per-site `.pkl` files that the central step reads; in deployment, these cores are the only artifacts transmitted.
 
----
-
-## Citation
-
-If you use this code, please cite:
-
-> Chen S, Lei Y, Li L, Tang H, Wang Y, Wang T, Zhang B, Wu Y, Hu J, Chen Q, Wang H, Amaro A, Lu Y, Qiu J, Lu Y, Chen Y. *MOTTO: a lossless tensor-train framework for multi-site time-to-event analysis of GLP-1 receptor agonists and psychiatric outcomes.* (Under review.)
-
-```bibtex
-@article{motto,
-  title   = {MOTTO: a lossless tensor-train framework for multi-site time-to-event
-             analysis of GLP-1 receptor agonists and psychiatric outcomes},
-  author  = {Chen, Siqi and Lei, Yuqing and Li, Lu and Tang, Huilin and Wang, Yudong
-             and Wang, Tingyin and Zhang, Bingyu and Wu, Yue and Hu, Jie and Chen, Qingyu
-             and Wang, Huiyuan and Amaro, Anastassia and Lu, Yuan and Qiu, Jingmei
-             and Lu, Yiwen and Chen, Yong},
-  year    = {2026},
-  note    = {Under review}
-}
-```
 
 ---
 
